@@ -194,7 +194,7 @@ namespace diverse
                     break;
                 }
             }
-            DS_LOG_INFO("Presentation mode:  {}", present_mode);
+            DS_LOG_INFO("Presentation mode:  {}", (size_t)present_mode);
 
             auto pre_transform = surface_capabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR ? VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR : surface_capabilities.currentTransform;
             auto surface_formats = enumerate_surface_formats(*device, *surface);

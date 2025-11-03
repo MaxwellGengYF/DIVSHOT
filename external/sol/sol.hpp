@@ -5968,7 +5968,9 @@ namespace sol {
 			static_assert(std::is_constructible<T, Args&&...>::value, "T must be constructible with Args");
 
 			*this = nullopt;
-			this->construct(std::forward<Args>(args)...);
+			// Fix this:
+			// this->construct(std::forward<Args>(args)...);
+			std::construct_at(&m_value, std::forward<Args>(args)...);
 		}
 
 		/// Swaps this optional with the other.

@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <utility/text_parser.h>
+#include <memory>
 
 namespace diverse
 {

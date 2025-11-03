@@ -1,5 +1,6 @@
 #include "backend/drs_rhi/gpu_device.h"
 #include "precompile.h"
+#include "imgui/ImUserConfig.h"
 #pragma warning(push, 0)
 #if DS_PROFILE
 #include <Tracy/public/TracyClient.cpp>

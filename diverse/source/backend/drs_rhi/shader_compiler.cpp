@@ -8,7 +8,19 @@
 #define loadLibrary(name) LoadLibraryA(name)
 #define getProcAddress(handle,name) GetProcAddress(handle, name)
 
-#include <atlbase.h> // ComPtr
+#ifndef D3DX12_USE_ATL
+#include <wrl/client.h>
+#define D3DX12_COM_PTR Microsoft::WRL::ComPtr
+#define D3DX12_COM_PTR_GET(x) x.Get()
+#define D3DX12_COM_PTR_ADDRESSOF(x) x.GetAddressOf()
+#else
+#include <atlbase.h>
+#define D3DX12_COM_PTR ATL::D3DX12_COM_PTR
+#define D3DX12_COM_PTR_GET(x) x.p
+#define D3DX12_COM_PTR_ADDRESSOF(x) &x.p
+#endif
+
+
 #include "dxcapi.h"
 #include <d3dcompiler.h>
 #else
@@ -117,14 +129,14 @@ namespace diverse
 	}
 // #ifdef DS_PLATFORM_WINDOWS
 	struct DxcBlobEncoding {
-		CComPtr<IDxcBlobEncoding> inner;
+		D3DX12_COM_PTR<IDxcBlobEncoding> inner;
 	};
 	struct DxcLibrary {
-		CComPtr<IDxcLibrary> inner;
+		D3DX12_COM_PTR<IDxcLibrary> inner;
 
 		auto create_blob_with_encoding_from_str(const std::string& text)->DxcBlobEncoding
 		{
-			CComPtr<IDxcBlobEncoding> blob;
+			D3DX12_COM_PTR<IDxcBlobEncoding> blob;
 			const u32 CPUTF8 = 65001; // UTF-8 translation
 			inner->CreateBlobWithEncodingFromPinned(text.c_str(), text.length(), CPUTF8,&blob);
 
@@ -133,8 +145,8 @@ namespace diverse
 
 		auto get_blob_as_string(const DxcBlobEncoding& blob)->std::string
 		{
-			CComPtr<IDxcBlobEncoding>	blob_utf8;
-			auto result = inner->GetBlobAsUtf8(blob.inner,&blob_utf8);
+			D3DX12_COM_PTR<IDxcBlobEncoding>	blob_utf8;
+			auto result = inner->GetBlobAsUtf8(D3DX12_COM_PTR_GET(blob.inner),&blob_utf8);
 
 			auto data = static_cast<const char*>(blob_utf8->GetBufferPointer());
 			auto size = blob_utf8->GetBufferSize();
@@ -143,7 +155,7 @@ namespace diverse
 		}
 	};
 	struct DxcBlob {
-		CComPtr<IDxcBlob> inner;
+		D3DX12_COM_PTR<IDxcBlob> inner;
 
 		//template<typename T>
 		//auto as_slice() -> T*
@@ -164,7 +176,7 @@ namespace diverse
 
 	};
 	struct DxcOperationResult {
-		CComPtr<IDxcOperationResult> inner;
+		D3DX12_COM_PTR<IDxcOperationResult> inner;
 
 		auto get_status() ->HRESULT {
 			HRESULT status = 0;
@@ -174,7 +186,7 @@ namespace diverse
 
 		auto get_result()-> DxcBlob
 		{
-			CComPtr<IDxcBlob> blob;
+			D3DX12_COM_PTR<IDxcBlob> blob;
 			inner->GetResult(&blob);
 	
 			return {blob};
@@ -182,7 +194,7 @@ namespace diverse
 
 		auto get_error_buffer()-> DxcBlobEncoding
 		{
-			CComPtr<IDxcBlobEncoding> blob;
+			D3DX12_COM_PTR<IDxcBlobEncoding> blob;
 			inner->GetErrorBuffer(&blob);
 			return { blob };
 		}
@@ -191,7 +203,7 @@ namespace diverse
 
 	struct DefaultIncludeHandler : public IDxcIncludeHandler
 	{
-		CComPtr<IDxcIncludeHandler> dxcIncludeHandler;
+		D3DX12_COM_PTR<IDxcIncludeHandler> dxcIncludeHandler;
 
 		HRESULT STDMETHODCALLTYPE LoadSource(
 			_In_z_ LPCWSTR pFilename,                                 // Candidate filename.
@@ -235,7 +247,7 @@ namespace diverse
 	};
 	struct DxcCompiler 
 	{
-		CComPtr<IDxcCompiler2> inner;
+		D3DX12_COM_PTR<IDxcCompiler2> inner;
 		DxcLibrary	library;
 
 		auto prep_defines(const std::vector<std::pair<std::string, std::string>>& defines, std::vector<std::pair<std::wstring,std::wstring >>& wide_defines, std::vector<DxcDefine>& dxc_defines)
@@ -287,9 +299,9 @@ namespace diverse
 			std::vector<DxcDefine> dxc_defines;
 			prep_defines(defines, wide_defines, dxc_defines);
 
-			CComPtr<IDxcOperationResult> result;
+			D3DX12_COM_PTR<IDxcOperationResult> result;
 
-			inner->Compile(blob.inner, 
+			inner->Compile(D3DX12_COM_PTR_GET(blob.inner), 
 				string_convert(source_name).c_str(), 
 				string_convert(entry_point).c_str(),
 				string_convert(target_profile).c_str(),
@@ -302,7 +314,7 @@ namespace diverse
 	struct Dxc
 	{
 		DxcCreateInstanceProc DxcCreateInstance = nullptr;
-		CComPtr<IDxcUtils> dxcUtils;
+		D3DX12_COM_PTR<IDxcUtils> dxcUtils;
 		Dxc()
 		{
 #ifdef DS_PLATFORM_WINDOWS
@@ -320,11 +332,11 @@ namespace diverse
 				DxcCreateInstance = (DxcCreateInstanceProc)getProcAddress(dxcompiler, "DxcCreateInstance");
 				if (DxcCreateInstance != nullptr)
 				{
-					CComPtr<IDxcCompiler3> dxcCompiler;
+					D3DX12_COM_PTR<IDxcCompiler3> dxcCompiler;
 					HRESULT hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler));
 					assert(SUCCEEDED(hr));
-					CComPtr<IDxcVersionInfo> info;
-					hr = dxcCompiler->QueryInterface(&info);
+					D3DX12_COM_PTR<IDxcVersionInfo> info;
+					hr = dxcCompiler->QueryInterface(D3DX12_COM_PTR_ADDRESSOF(info));
 					assert(SUCCEEDED(hr));
 					uint32_t minor = 0;
 					uint32_t major = 0;
@@ -345,7 +357,7 @@ namespace diverse
 		}
 
 		auto create_compiler() ->DxcCompiler {
-			CComPtr<IDxcCompiler2> dxcCompiler;
+			D3DX12_COM_PTR<IDxcCompiler2> dxcCompiler;
 	
 			auto hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler));
 			assert(SUCCEEDED(hr));
@@ -354,7 +366,7 @@ namespace diverse
 		}
 
 		auto create_library() -> DxcLibrary {
-			CComPtr<IDxcLibrary> library;
+			D3DX12_COM_PTR<IDxcLibrary> library;
 			HRESULT hr = DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&library));
 			assert(SUCCEEDED(hr));
 	
@@ -362,7 +374,7 @@ namespace diverse
 		}
 		auto create_include_handler()-> DefaultIncludeHandler
 		{
-			CComPtr<IDxcIncludeHandler> dxcIncludeHandler;
+			D3DX12_COM_PTR<IDxcIncludeHandler> dxcIncludeHandler;
 
 			auto hr = dxcUtils->CreateDefaultIncludeHandler(&dxcIncludeHandler);
 			assert(SUCCEEDED(hr));

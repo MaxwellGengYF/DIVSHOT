@@ -1,0 +1,14 @@
+{
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "clangd.arguments": [
+        "--compile-commands-dir=.vscode",
+        "--log=error",
+        "--completion-style=bundled",
+        "--background-index",
+        "--background-index-priority=normal",
+        "--header-insertion=never",
+        "--pch-storage=memory"
+    ],
+    "ccls.misc.compilationDatabaseDirectory": ".vscode",
+    "ccls.cache.directory": ".vscode/.ccls-cache"
+}

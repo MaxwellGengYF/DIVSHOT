@@ -30,7 +30,7 @@ namespace diverse
                 return load_hdr(path.string());
             else if( ext == ".exr")
                 return load_exr(path.string());
-           throw std::runtime_error{fmt::format("unknown image extension '{}'", path.extension())};
+           throw std::runtime_error{fmt::format("unknown image extension '{}'", path.extension().string())};
         }
 
 

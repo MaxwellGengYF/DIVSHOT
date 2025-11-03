@@ -1,6 +1,5 @@
 #include <string>
 #include "vk_barrier_utils.h"
-
 namespace vk
 {
     auto get_image_memory_barrier(ImageBarrier barrier) -> std::tuple<

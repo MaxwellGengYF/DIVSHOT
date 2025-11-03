@@ -3,6 +3,7 @@
 #include <set>
 #include <optional>
 #include <unordered_map>
+#include <core/base_type.h>
 
 namespace diverse
 {
