@@ -138,6 +138,9 @@ do
         target:add('includedirs', rela('.'), rela('backends'), {
             public = true
         })
+        target:add('defines', 'IMGUI_USER_CONFIG="imgui/ImUserConfig.h"', {
+            interface = true
+        })
         if target:is_plat('windows') then
             -- need shared library?
 
@@ -383,6 +386,34 @@ do
 end
 target_end()
 
+target('opencv2')
+do
+    set_kind('headeronly')
+    add_includedirs('opencv4_9/include', {
+        public = true
+    })
+    on_load(function(target)
+        if is_mode('debug') then
+            target:add('links', 'opencv4_9/linklib/opencv_world490d', {
+                public = true
+            })
+        else
+            target:add('links', 'opencv4_9/linklib/opencv_world490', {
+                public = true
+            })
+        end
+    end)
+    after_build(function(target)
+        os.mkdir(target:targetdir())
+        if target:is_plat('windows') then
+            os.cp(path.join(os.scriptdir(), 'opencv4_9/linklib/*.dll'), target:targetdir(), {
+                copy_if_different = true
+            })
+        end
+    end)
+end
+target_end()
+
 target('external')
 do
     set_kind('phony')
@@ -390,7 +421,7 @@ do
         public = true
     })
     add_deps('cereal', 'cli11', 'glm', 'glad', 'glfw', 'freetype', 'imgui', 'lua', 'meshoptimizer', 'msdf-atlas-gen',
-        'ozz', 'pkg', 'pugixml', 'spdlog', 'spz', 'stb', 'tinyexr', 'tinyply', 'tomasakeninemoeller',
-        'volk', 'webgpu', 'xatlas')
+        'ozz', 'pkg', 'pugixml', 'spdlog', 'spz', 'stb', 'tinyexr', 'tinyply', 'tomasakeninemoeller', 'volk', 'webgpu',
+        'xatlas')
 end
 target_end()

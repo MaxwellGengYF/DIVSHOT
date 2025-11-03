@@ -1,1 +1,1 @@
-includes('diverseshot-cli', 'editor', 'resource', 'runtime', 'splatx-cli')
+includes('editor', 'runtime')

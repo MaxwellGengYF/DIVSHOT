@@ -22,4 +22,4 @@ option('div_enable_wayland', {
     default = false
 })
 
-includes('xmake/xmake_func.lua', 'external', 'diverse')
+includes('xmake/xmake_func.lua', 'external', 'diverse', 'application')

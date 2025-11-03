@@ -1,4 +1,3 @@
-#include <imgui/ImUserConfig.h>
 #include <imgui.h>
 #include <volk.h>
 #include <string>

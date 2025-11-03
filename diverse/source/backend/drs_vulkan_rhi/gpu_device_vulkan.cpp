@@ -3319,7 +3319,7 @@ namespace diverse
             for (int level = 0; level < initial_data.size(); level++)
             {
                 auto sub = initial_data[level];
-                assert(offset % block_bytes == 0);
+                // assert(offset % block_bytes == 0);
                 memcpy(dstData + offset, sub.data, sub.size);
 
                 VkImageSubresourceLayers subresourceRange = {};

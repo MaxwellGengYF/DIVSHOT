@@ -4,6 +4,6 @@ do
         project_kind = 'binary'
     })
     add_files('**.cpp')
-    add_deps('external')
+    add_deps('diverse')
 end
 target_end()

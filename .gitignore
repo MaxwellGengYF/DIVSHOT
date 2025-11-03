@@ -188,3 +188,6 @@ editor/diverse_log.txt
 *cached
 *dsn
 *dvs
+xmake/
+.vscode/*
+!.vscode/settings.json
